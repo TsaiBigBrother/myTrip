@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>2026 港澳 5日遊 - TsaiBigBrother</title>
+    <style>
+/* TsaiBigBrother Style Variables */
+:root{--primary:#D35400;--accent:#E67E22;--bg:#F5F6FA;--card:#FFFFFF;--text:#2D3436;--sub:#636E72;--sunq:#16A34A;--jr:#DC2626;--dazaifu:#7C3AED;--money:#27AE60;--cotai:#0056b3;}
+@media (prefers-color-scheme: dark){:root{--bg:#1a1a1a;--card:#2d2d2d;--text:#ecf0f1;--sub:#bdc3c7;}}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);padding-bottom:80px;line-height:1.5;}
+
+/* 上方票券列 */
+.pass-bar{
+    position:fixed;top:0;left:0;right:0;
+    background:rgba(0,0,0,0.93);backdrop-filter:blur(15px);
+    color:white;z-index:9999;
+    padding:10px 12px;
+    padding-top:max(env(safe-area-inset-top),22px);
+    display:flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap:10px;
+}
+.pass-tag{
+    flex-shrink: 0; 
+    min-width:98px;max-width:145px;
+    padding:12px 10px;border-radius:18px;
+    font-size:13px;font-weight:700;text-align:center;line-height:1.3;
+    box-shadow:0 3px 10px rgba(0,0,0,0.4);
+    transition:all .25s;cursor:pointer;
+}
+.pass-tag:active{transform:translateY(2px);}
+.pass-tag.sunq{background:var(--sunq);}
+.pass-tag.jr{background:var(--jr);}
+.pass-tag.cotai{background:var(--cotai);}
+.pass-tag.dazaifu{background:var(--dazaifu);}
+.pass-tag.money{background:var(--money);}
+.pass-tag.emergency{background:#e74c3c;}
+
+/* 手機版調整 */
+@media (max-width:520px){
+    .pass-bar{
+        gap:8px;padding:8px 10px;padding-top:max(env(safe-area-inset-top),18px);
+        justify-content: flex-start;
+    }
+    .pass-tag{font-size:12.5px;padding:10px 8px;min-width:80px;}
+    header{margin-top:calc(env(safe-area-inset-top) + 85px);}
+}
+
+header{
+    background:linear-gradient(135deg,var(--primary),var(--accent));
+    color:white;padding:24px 20px;text-align:center;
+    margin-top:calc(env(safe-area-inset-top) + 85px);
+}
+h1{font-size:25px;font-weight:800;margin:0;}
+.subtitle{font-size:15px;opacity:0.95;margin-top:6px;}
+
+/* FAB */
+.fab{
+    position:fixed;bottom:max(22px,env(safe-area-inset-bottom));right:22px;
+    background:var(--primary);color:white;
+    width:58px;height:58px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 5px 18px rgba(0,0,0,0.35);z-index:998;cursor:pointer;
+    opacity:0;visibility:hidden;
+    transition:all .4s cubic-bezier(0.4,0,0.2,1);
+}
+.fab.show{opacity:1;visibility:visible;}
+.fab svg{stroke:white;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;width:34px;height:34px;}
+
+/* Modal */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;justify-content:center;align-items:center;}
+.modal-content{background:var(--card);margin:20px;padding:24px;border-radius:16px;max-width:90%;max-height:85%;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,0.35);position:relative;text-align:center;}
+.close{position:absolute;top:8px;right:15px;font-size:32px;color:var(--sub);cursor:pointer;}
+
+#vjw-modal img {
+    max-width: 250px;
+    width: 85%;
+    height: auto;
+    margin: 15px auto;
+    display: block;
+    border: 4px solid var(--card);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Timeline */
+.container{max-width:600px;margin:0 auto;padding:0 15px;}
+.day-group{margin:20px 0;}
+.day-header{background:var(--card);padding:16px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 10px rgba(0,0,0,0.09);cursor:pointer;border-left:6px solid var(--primary);user-select:none;}
+.day-title{font-weight:bold;font-size:16.5px;}
+.toggle{font-size:24px;transition:transform .3s;}
+.active .toggle {transform: rotate(180deg);}
+.spots {display: none; padding-left: 14px; border-left: 2px solid #ddd; margin-left: 15px; margin-top: 12px;}
+.active .spots {display: block;}
+
+.spot {background: var(--card); margin: 14px 0 14px 16px; padding: 15px; border-radius: 14px; position: relative; box-shadow: 0 3px 8px rgba(0,0,0,0.07);}
+.spot::before {content: ''; position: absolute; left: -22px; top: 20px; width: 11px; height: 11px; border-radius: 50%; background: var(--sub); border: 2.5px solid var(--bg);}
+.spot.sunq::before {background: var(--sunq);}
+.spot.jr::before {background: var(--jr);}
+.spot.cotai::before {background: var(--cotai);}
+.spot.dazaifu::before {background: var(--dazaifu);}
+.spot.money::before {background: var(--money);}
+
+.time {background: var(--card); color: var(--sub); padding: 4px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; margin-bottom: 7px; display: inline-block;}
+.title {font-size: 16.5px; font-weight: 600; display: flex; align-items: center; justify-content: space-between;}
+.check {width: 21px; height: 21px; border: 2.5px solid #ccc; border-radius: 50%; margin-right: 11px; cursor: pointer; flex-shrink: 0;}
+.done .check {background: var(--primary); border-color: var(--primary); position: relative;}
+.done .check::after {content: '✓'; color: white; font-size: 13px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);}
+.done .title {text-decoration: line-through; opacity: 0.6;}
+
+.content {font-size: 14px; color: var(--sub); line-height: 1.6; margin: 7px 0;}
+.content a {color: #3498db; text-decoration: underline;}
+
+.tags {display: flex; gap: 7px; flex-wrap: wrap; margin-top: 9px; font-size: 11.5px;}
+.tag {padding: 4px 9px; border-radius: 5px;}
+.tag.pass {background: #e8f5e9; color: #1a7431;}
+.tag.save {background: #f0f8ff; color: #0066cc; font-weight: 700;}
+.tag.alert {background: #fef2f2; color: #dc2626; font-weight: 700;}
+
+.map {background: #3498db; color: white; padding: 5px 9px; border-radius: 5px; font-size: 10.5px; cursor: pointer; border: none;}
+
+/* Distance & Icon */
+.dist-display {
+    font-size: 12px;
+    color: var(--primary);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+.dist-icon {
+    font-size: 14px;
+    margin-right: 4px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 40px 20px;
+    font-size: 13px;
+    color: var(--sub);
+    background: var(--bg);
+    width: 100%;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    margin-top: 40px;
+}
+footer p {
+    margin: 8px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+footer a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: bold;
+    margin: 0 4px;
+}
+    </style>
+</head>
+<body>
+
+<div class="pass-bar" id="passBar"></div>
+<div class="fab" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 15l-6-6-6 6"/></svg>
+</div>
+
+<div id="vjw-modal" class="modal" onclick="toggleVjwModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close" onclick="toggleVjwModal()">×</span>
+        <h3>入境 QR Code</h3>
+        <div id="vjw-img-container"></div>
+        <p style="margin-top:15px;font-size:13px;color:var(--sub)">請截圖保存以備離線使用</p>
+    </div>
+</div>
+
+<div id="flight-modal" class="modal" onclick="closeAllModals()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close" onclick="closeAllModals()">×</span>
+        <h3>班機資訊</h3>
+        <p id="flight-info" style="white-space: pre-line; margin-top:15px; text-align:left; line-height:1.6;"></p>
+    </div>
+</div>
+
+<div id="modal" class="modal" onclick="closeAllModals()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close" onclick="closeAllModals()">×</span>
+        <h3 id="modal-title"></h3>
+        <p id="modal-info" style="margin:15px 0;line-height:1.6;"></p>
+        <p id="modal-benefits" style="color:var(--primary);font-weight:bold;font-size:14px;"></p>
+    </div>
+</div>
+
+<header>
+    <h1 id="header-title"></h1>
+    <div class="subtitle" id="header-subtitle"></div>
+</header>
+
+<div class="container" id="timeline"></div>
+
+<footer id="footer"></footer>
+
+<script>
+const tripData = {
+  "title": "2026 港澳 5日遊 - TsaiBigBrother",
+  "subtitle": "2/6 TPE→HKG (BR871) | 2/10 HKG→TPE (BR810)",
+  "passes": {
+    "money": {
+      "tag": "換匯攻略<br>週六注意",
+      "title": "💰 港澳換錢攻略",
+      "info": "<div style='text-align:left;'><b>⚠️ 週六下午 1-2 點後，匯率優的老店會關門！</b><br><br><b>1. D1 週五晚 (機場)：</b><br>使用 ATM (銀通/HSBC) 提領少量現金。<br><br><b>2. D2 週六早 (09:00-13:00)：</b><br>📍 <b>上環牛記</b> 或 <b>尖沙咀堅成</b> (匯率最優)。<br><br><b>3. D2 週六午 (14:00後)：</b><br>📍 <b>油麻地飛鳥找換</b> (開到晚上) 或 重慶大廈內部店家。<br><br>💡 澳門通用港幣，不需特地換澳門幣。</div>",
+      "benefits": "務必注意週六營業時間！"
+    },
+    "cotai": {
+      "tag": "金光飛航<br>去程",
+      "title": "金光飛航 (Cotai Water Jet)",
+      "info": "香港上環 07:30 → 澳門氹仔 08:30。<br>下船後可直接前往威尼斯人/倫敦人（有免費接駁車）。",
+      "benefits": "藍色船身，前往氹仔首選"
+    },
+    "jr": {
+      "tag": "噴射飛航<br>回程",
+      "title": "噴射飛航 (TurboJET)",
+      "info": "澳門外港碼頭 → 香港上環。<br>紅色船身。適合從澳門半島（大三巴、漁人碼頭）回程使用。",
+      "benefits": "紅色船身，往返半島首選"
+    },
+    "sunq": {
+      "tag": "八達通<br>全港通",
+      "title": "八達通 (Octopus)",
+      "info": "香港必備！地鐵、巴士、渡輪、便利商店、餐廳皆通用。<br>建議於機場快線櫃台或便利商店購買。",
+      "benefits": "全港通用，省去購票時間"
+    },
+    "dazaifu": {
+      "tag": "昂坪360<br>纜車",
+      "title": "昂坪 360 纜車",
+      "info": "東涌 ↔ 昂坪市集。<br>建議購買水晶車廂，視野極佳，可俯瞰大嶼山與機場。",
+      "benefits": "熱門景點，建議預約"
+    }
+  },
+  "vjw": {
+    "enabled": false,
+    "image": "",
+    "valid": ""
+  },
+  "emergency": {
+    "title": "緊急聯絡（港澳）",
+    "info": "香港報案/火警/急救：999<br>澳門報案/火警/急救：999<br>台北駐香港辦事處：+852-2525-8316<br>台北駐澳門辦事處：+853-2830-6289"
+  },
+  "flight": {
+    "enabled": true,
+    "info": "去程 BR871 (EVA AIR)\n2/6 16:35 TPE → 18:30 HKG\n\n回程 BR810 (EVA AIR)\n2/10 21:50 HKG → 23:35 TPE"
+  },
+  "footer": {
+    "enabled": true,
+    "text": "<p>© 2026 Created by <a href='#' target='_blank'>TsaiBigBrother 蔡大哥</a></p><p>本行程由 AI 輔助規劃並採用 <b>蔡大哥旅遊模板</b> 製作</p>"
+  },
+  "days": [
+    {
+      "d": "D1", "date": "2/6（五）", "title": "抵達香港 → 灣仔雨備",
+      "spots": [
+        { "t": "16:35", "title": "TPE 起飛 (BR871)", "c": "預計 18:30 抵達 HKG<br><b onclick=\"closeAllModals();document.getElementById('flight-modal').style.display='flex'\">點這裡查看班機資訊</b>", "lat": 25.0797, "lng": 121.2342, "move": "plane" },
+        { "t": "18:30", "title": "抵達香港機場 HKG", "c": "通關＋行李約45分。前往機場快線/巴士站。", "lat": 22.3080, "lng": 113.9185, "move": "walk" },
+        { "t": "19:30", "title": "前往灣仔 六國酒店", "c": "搭乘 A11 巴士或機場快線轉地鐵至灣仔站。", "pass": "八達通", "type": "sunq", "lat": 22.2783, "lng": 114.1717, "move": "bus" },
+        { "t": "20:30", "title": "晚餐：靠得住粥麵", "c": "<b>行程優化！</b>再興/華星都已關門或售完。改吃這家<b>米其林必比登推薦</b>，開到23:45，豬肝粥/鮮蝦雲吞麵必點。就在飯店附近。", "lat": 22.2775, "lng": 114.1740, "save": "Safe", "move": "walk" },
+        { "t": "22:00", "title": "換錢所 & 採買", "c": "灣仔區找換店匯率普通，建議先換少量。", "type": "money", "lat": 22.2770, "lng": 114.1725, "move": "walk" }
+      ]
+    },
+    {
+      "d": "D2", "date": "2/7（六）", "title": "中環文藝 & 燒鵝打小人",
+      "spots": [
+        { "t": "09:00", "title": "早餐：六安居 (原蓮香居)", "c": "上環。體驗傳統推車點心。06:00就開了，不用擔心。", "lat": 22.2872, "lng": 114.1485, "move": "mtr" },
+        { "t": "10:00", "title": "🔥 換匯首選：牛記找換", "c": "<b>週六 13:00 關門！</b>就在上環。若沒開請去尖沙咀堅成(開到14:00)或油麻地飛鳥(開到晚上)。", "type": "money", "lat": 22.2865, "lng": 114.1515, "move": "walk" },
+        { "t": "10:30", "title": "中環半山扶手電梯", "c": "途經：石板街、嘉咸街壁畫、大館。", "lat": 22.2830, "lng": 114.1550, "move": "walk" },
+        { "t": "12:00", "title": "伴手禮：珍妮曲奇 & 檸檬王", "c": "上環永和街。買完建議先寄物或回飯店。", "lat": 22.2855, "lng": 114.1520, "move": "walk" },
+        { "t": "13:00", "title": "午餐：勝香園", "c": "中環大排檔。番茄通粉。(週日不開，今日來是對的)", "lat": 22.2843, "lng": 114.1528, "move": "walk" },
+        { "t": "15:00", "title": "怪獸大廈 (海山樓)", "c": "地鐵太古站。打卡熱點。", "lat": 22.2842, "lng": 114.2124, "move": "mtr" },
+        { "t": "17:30", "title": "晚餐：甘牌燒鵝 / 再興", "c": "<b>動線優化！</b>先在灣仔吃飯，避開越晚排越長。甘牌需排隊，再興較快。吃飽剛好就在附近打小人。", "lat": 22.2780, "lng": 114.1750, "save": "優先", "move": "taxi" },
+        { "t": "19:00", "title": "鵝頸橋打小人", "c": "<b>順路行程！</b>從燒臘店走過來約5-8分。就在灣仔/銅鑼灣交界，打完去中環看夜景剛剛好。", "lat": 22.2798, "lng": 114.1815, "save": "順路", "move": "walk" },
+        { "t": "19:45", "title": "太平山頂纜車", "c": "中環花園道。<b>已購買快通！</b>這時間上山剛好看到百萬夜景。", "pass": "山頂纜車", "type": "dazaifu", "lat": 22.2775, "lng": 114.1585, "move": "taxi" },
+        { "t": "21:30", "title": "蘭桂坊 (Lan Kwai Fong)", "c": "<b>週六夜生活！</b>下山後直接到中環喝一杯，動線不走回頭路。", "lat": 22.2810, "lng": 114.1555, "move": "walk" }
+      ]
+    },
+    {
+      "d": "D3", "date": "2/8（日）", "title": "黃大仙祈福 & 賽馬日",
+      "spots": [
+        { "t": "08:30", "title": "早餐：澳洲牛奶公司", "c": "佐敦。07:30開門。提早出發避開人潮。", "lat": 22.3046, "lng": 114.1705, "move": "mtr" },
+        { "t": "09:45", "title": "黃大仙祠 (Wong Tai Sin)", "c": "07:30開門。香火最鼎盛，求籤靈驗。", "lat": 22.3426, "lng": 114.1934, "move": "mtr" },
+        { "t": "11:30", "title": "沙田馬場 (Racecourse)", "c": "地鐵馬場站。週日賽事約12:45開始，現在進場剛好。", "lat": 22.4000, "lng": 114.2050, "move": "mtr" },
+        { "t": "15:30", "title": "合益泰小食 (深水埗)", "c": "開到20:00。必比登推薦腸粉。", "lat": 22.3308, "lng": 114.1610, "save": "必吃", "move": "mtr" },
+        { "t": "17:00", "title": "旺角街頭：通達 & 肥姐", "c": "1. 通達食店：咖哩魚蛋<br>2. 肥姐小食店：冷滷味", "lat": 22.3195, "lng": 114.1694, "move": "mtr" },
+        { "t": "19:00", "title": "維多利亞港 & 星光大道", "c": "尖沙咀海旁。散步看夜景。", "lat": 22.2935, "lng": 114.1730, "move": "bus" },
+        { "t": "20:30", "title": "晚餐：廟街夜市", "c": "興記煲仔飯。感受大排檔。", "lat": 22.3060, "lng": 114.1695, "move": "walk" },
+        { "t": "22:00", "title": "甜點：佳佳甜品", "c": "開到凌晨。佐敦寧波街。", "lat": 22.3048, "lng": 114.1685, "save": "必吃", "move": "walk" }
+      ]
+    },
+    {
+      "d": "D4", "date": "2/9（一）", "title": "澳門：盛記白粥 & 官也街",
+      "spots": [
+        { "t": "07:30", "title": "香港上環 → 澳門氹仔 (金光飛航)", "c": "<b>已購票！</b>07:30 上環開船。預計 08:30 抵達氹仔客運碼頭。", "pass": "Cotai Jet", "type": "cotai", "lat": 22.2885, "lng": 114.1520, "move": "mtr" },
+        { "t": "09:00", "title": "早餐：盛記白粥 (氹仔店)", "c": "<b>完美銜接！</b>下船後直接搭計程車來(約10分)。<br>必點：白粥、蘿蔔糕、豆腐花 (清淡開胃)。", "lat": 22.1585, "lng": 113.5535, "save": "新加入", "move": "taxi" },
+        { "t": "10:15", "title": "威尼斯人 & 倫敦人", "c": "吃飽後步行或短程車過去。趁早上人潮較少，先拍倫敦人大笨鐘與威尼斯人運河。", "lat": 22.1470, "lng": 113.5600, "move": "walk" },
+        { "t": "11:30", "title": "官也街 & 安德魯蛋塔", "c": "<b>行程加碼！</b>從威尼斯人西翼使用「自動步行系統」即可抵達。必買安德魯蛋塔！", "lat": 22.1538, "lng": 113.5573, "save": "必去", "move": "walk" },
+        { "t": "12:45", "title": "前往澳門半島 (公車)", "c": "<b>交通攻略：</b>走到官也街尾端 Starbucks 旁<br>1. 上車：<b>T323 黑橋/地堡街</b> (搭 33 或 26A)<br>2. 下車：<b>M171 中區/殷皇子馬路</b> (約20分)", "lat": 22.1540, "lng": 113.5560, "move": "bus" },
+        { "t": "13:30", "title": "午餐：陳光記燒臘", "c": "<b>步行導航：</b>公車站下車後往回走，看到「周大福」左轉羅保博士街即達。黑椒燒鴨必點。", "lat": 22.1921, "lng": 113.5424, "save": "必吃", "move": "walk" },
+        { "t": "14:30", "title": "大三巴 & 歷史城區", "c": "步行遊覽：議事亭前地、玫瑰堂、大三巴牌坊、戀愛巷。", "lat": 22.1975, "lng": 113.5405, "move": "walk" },
+        { "t": "16:30", "title": "漁人碼頭 / 金蓮花廣場", "c": "半島順遊景點。羅馬競技場風格，適合拍照。", "lat": 22.1930, "lng": 113.5560, "move": "bus" },
+        { "t": "18:00", "title": "晚餐：番茄屋 (Tomato)", "c": "<b>在地推薦！</b>就在大三巴旁哪吒廟斜巷。CP值極高，適合兩人用餐 (約$100-150)。", "lat": 22.1977, "lng": 113.5401, "save": "高CP", "move": "walk" },
+        { "t": "20:30", "title": "前往外港碼頭", "c": "晚餐後搭車前往外港碼頭 (約 10-15 分)。", "lat": 22.1965, "lng": 113.5555, "move": "taxi" },
+        { "t": "21:00", "title": "返程：澳門外港 → 香港上環", "c": "搭乘<b>噴射飛航 (TurboJET)</b>。返回香港。", "pass": "TurboJET", "type": "jr", "lat": 22.1965, "lng": 113.5555, "move": "ship" }
+      ]
+    },
+    {
+      "d": "D5", "date": "2/10（二）", "title": "大嶼山 & 機場衝刺",
+      "spots": [
+        { "t": "08:30", "title": "早餐：華星冰室", "c": "<b>完美安排！</b>就在灣仔飯店旁。黑松露炒蛋多士。吃飽再退房。", "lat": 22.2780, "lng": 114.1760, "save": "新加入", "move": "walk" },
+        { "t": "09:30", "title": "飯店 Check-out", "c": "搭地鐵/巴士前往東涌 (約 50 分)。", "lat": 22.2783, "lng": 114.1717, "move": "walk" },
+        { "t": "10:30", "title": "東涌 Citygate 寄物", "c": "地鐵東涌站 B2 或南面置物櫃。<br><b style='color:#d35400'>注意：</b>08:00開始營業。早點到比較有大櫃位。", "lat": 22.2895, "lng": 113.9410, "save": "關鍵", "move": "mtr" },
+        { "t": "11:00", "title": "昂坪 360 纜車", "c": "水晶車廂。抵達昂坪站後，穿越昂坪市集(約10分)即可見到大佛，可選擇挑戰268級階梯。", "pass": "昂坪纜車", "type": "dazaifu", "lat": 22.2905, "lng": 113.9385, "move": "cable" },
+        { "t": "13:30", "title": "大澳漁村", "c": "<b>交通：</b>昂坪巴士總站搭<b>21號巴士</b> (約20分)。<br><b>體驗：</b>1. 搭小艇看棚屋海豚($20) 2. 大澳餅店沙翁 3. 炭燒雞蛋仔", "lat": 22.2535, "lng": 113.8630, "move": "bus" },
+        { "t": "16:30", "title": "返回東涌 & 取行李", "c": "<b>交通：</b>大澳巴士總站搭<b>11號巴士</b> (約50分)。<br>下車點為東涌站巴士總站，旁邊即是東薈城取行李。", "lat": 22.2895, "lng": 113.9410, "move": "bus" },
+        { "t": "17:30", "title": "Bakehouse (東薈城店)", "c": "<b>風險提示：</b>下午蛋塔極可能完售！建議早上寄物時先買/預訂。若傍晚才買，要有心理準備。", "lat": 22.2895, "lng": 113.9410, "tag": "alert", "move": "walk" },
+        { "t": "19:00", "title": "前往機場 (BR810)", "c": "搭 <b>S1 巴士</b> (約15分) 至機場一號客運大樓。<br>預計 19:20 抵達，距離 21:50 起飛非常充裕。", "lat": 22.3080, "lng": 113.9185, "save": "Safe", "move": "bus" }
+      ]
+    }
+  ]
+};
+
+// 關閉所有 Modals
+function closeAllModals() {
+    document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+    document.querySelectorAll('.day-group').forEach(d => {
+        d.classList.remove('active');
+        d.querySelector('.toggle').innerText = '▼';
+    });
+}
+
+// 開關 VJW Modal
+function toggleVjwModal() {
+    const modal = document.getElementById('vjw-modal');
+    modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+}
+
+// 單一展開行程
+function toggleDay(event) {
+    const header = event.currentTarget;
+    const currentGroup = header.parentElement;
+    const isActive = currentGroup.classList.contains('active');
+    closeAllModals(); // 收合其他
+    if (!isActive) {
+        currentGroup.classList.add('active');
+        header.querySelector('.toggle').innerText = '▲';
+    }
+}
+
+// 開啟地圖
+function openMap(lat, lng, name) {
+    let query = name;
+    if (!/站|機場|神社|寺|市|市場|橋|城|湖|岳|宮|酒店|飯店/i.test(name)) {
+        query += " 香港";
+    }
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}&ll=${lat},${lng}`, '_blank');
+}
+
+// 計算距離 (Haversine)
+function getDistance(lat1, lon1, lat2, lon2) {
+    if (!lat1 || !lat2) return 0;
+    const R = 6371; 
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return (R * c).toFixed(1);
+}
+
+// 取得交通 Icon
+function getMoveIcon(mode) {
+    switch(mode) {
+        case 'walk': return '🚶';
+        case 'mtr': return '🚇';
+        case 'bus': return '🚌';
+        case 'ship': return '⛴️';
+        case 'taxi': return '🚕';
+        case 'plane': return '✈️';
+        case 'cable': return '🚡';
+        default: return '🚗';
+    }
+}
+
+// Modal
+function openModal(e) {
+    const key = e.currentTarget.dataset.modal;
+    let title = "", info = "", benefits = "";
+
+    if (key === 'emergency' && tripData.emergency) {
+        title = tripData.emergency.title;
+        info = tripData.emergency.info;
+    } else if (tripData.passes[key]) {
+        title = tripData.passes[key].title;
+        info = tripData.passes[key].info;
+        benefits = tripData.passes[key].benefits;
+    } else {
+        return;
+    }
+
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-info').innerHTML = info;
+    document.getElementById('modal-benefits').textContent = benefits || '';
+    document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+    document.getElementById('modal').style.display = 'flex';
+}
+
+// Render
+function render() {
+    document.title = tripData.title;
+    document.getElementById('header-title').textContent = tripData.title;
+    document.getElementById('header-subtitle').textContent = tripData.subtitle;
+    if(tripData.flight && tripData.flight.enabled) {
+        document.getElementById('flight-info').textContent = tripData.flight.info;
+    }
+
+    // Passes
+    const passBar = document.getElementById('passBar');
+    let passHTML = '';
+    for (const [key, p] of Object.entries(tripData.passes)) {
+        passHTML += `<div class="pass-tag ${key}" data-modal="${key}">${p.tag}</div>`;
+    }
+    if (tripData.emergency) {
+        passHTML += `<div class="pass-tag emergency" data-modal="emergency">緊急聯絡</div>`;
+    }
+    passBar.innerHTML = passHTML;
+
+    document.querySelectorAll('.pass-tag[data-modal]').forEach(tag => {
+        tag.addEventListener('click', openModal);
+    });
+
+    if (tripData.vjw && tripData.vjw.enabled) {
+        document.getElementById('vjw-img-container').innerHTML = `<img src="${tripData.vjw.image}" alt="QR Code">`;
+    }
+
+    // Timeline
+    const timeline = document.getElementById('timeline');
+    let html = '';
+
+    tripData.days.forEach(day => {
+        let spotsHTML = '';
+        let prevLat = null, prevLng = null;
+
+        day.spots.forEach((s, index) => {
+            let tags = '';
+            if (s.pass) tags += `<span class="tag pass">${s.pass}</span>`;
+            if (s.save) tags += `<span class="tag save">${s.save}</span>`;
+            
+            let mapBtn = '';
+            let distHTML = '';
+            
+            if (s.lat && s.lng) {
+                mapBtn = `<button class="map" onclick="event.stopPropagation();openMap(${s.lat},${s.lng},'${s.title.replace(/'/g,"\\'")}')">地圖</button>`;
+                
+                // 距離 & 交通方式
+                if (index > 0 && prevLat && prevLng) {
+                    const dist = getDistance(prevLat, prevLng, s.lat, s.lng);
+                    const moveIcon = getMoveIcon(s.move);
+                    distHTML = `<div class="dist-display"><span class="dist-icon">${moveIcon}</span> 距上一站: ${dist} km</div>`;
+                } else if (index === 0 && s.move === 'plane') {
+                     distHTML = `<div class="dist-display"><span class="dist-icon">✈️</span> 啟程</div>`;
+                }
+
+                prevLat = s.lat;
+                prevLng = s.lng;
+            }
+
+            let typeClass = s.type ? s.type : '';
+            if (s.tag === 'alert') {
+                tags += `<span class="tag alert">風險提示</span>`;
+            }
+
+            spotsHTML += `
+            <div class="spot ${typeClass}" onclick="this.classList.toggle('done')">
+                <div class="time">${s.t}</div>
+                <div class="title">
+                    <div style="display:flex;align-items:center;">
+                        <div class="check"></div>
+                        <span>${s.title}</span>
+                    </div>
+                    ${mapBtn}
+                </div>
+                ${distHTML}
+                <div class="content">${s.c}</div>
+                <div class="tags">${tags}</div>
+            </div>`;
+        });
+
+        html += `
+        <div class="day-group">
+            <div class="day-header" onclick="toggleDay(event)">
+                <div>
+                    <div class="day-title">${day.d} ${day.title}</div>
+                    <div style="font-size:12px;color:var(--sub)">${day.date}</div>
+                </div>
+                <div class="toggle">▼</div>
+            </div>
+            <div class="spots">${spotsHTML}</div>
+        </div>`;
+    });
+
+    timeline.innerHTML = html;
+    if (tripData.footer && tripData.footer.enabled) {
+        document.getElementById('footer').innerHTML = tripData.footer.text;
+    }
+}
+
+window.addEventListener('scroll', () => {
+    const fab = document.getElementById('backToTop');
+    if (window.scrollY > 300) fab.classList.add('show');
+    else fab.classList.remove('show');
+});
+
+render();
+</script>
+
+</body>
+</html>
